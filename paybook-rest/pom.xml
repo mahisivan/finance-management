@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.mahesh.fna</groupId>
+	<artifactId>paybook-rest</artifactId>
+	<version>1.0-SNAPSHOT</version>
+	<packaging>jar</packaging>
+	<name>paybook-rest</name>
+	<description>FNA RestFull Service with Spring Boot</description>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>4.0.0</version>
+		<relativePath />
+	</parent>
+	<properties>
+		<maven.compiler.source>25</maven.compiler.source>
+		<maven.compiler.target>25</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<java.version>25</java.version>
+		<springdoc-openapi.version>1.7.0</springdoc-openapi.version>
+		<report-engine.version>1.0.0</report-engine.version>
+		<utility-framework.version>1.0.0</utility-framework.version>
+		<fna-api.version>1.0.0</fna-api.version>
+		<fna-service.version>1.0.0</fna-service.version>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webmvc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-ui</artifactId>
+			<version>${springdoc-openapi.version}</version>
+		</dependency>
+		<!-- Custom Dependencies -->
+		<dependency>
+			<groupId>com.mahesh.product.if.reports</groupId>
+			<artifactId>report-engine</artifactId>
+			<version>${report-engine.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.mahesh.product.if.utility</groupId>
+			<artifactId>utility-framework</artifactId>
+			<version>${utility-framework.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.mahesh.product.fna.app</groupId>
+			<artifactId>debt-manager-api</artifactId>
+			<version>${fna-api.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.mahesh.product.fna.app</groupId>
+			<artifactId>debt-manager-service</artifactId>
+			<version>${fna-service.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>ch.qos.logback</groupId>
+					<artifactId>logback-classic</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+	</dependencies>
+</project>
