@@ -31,15 +31,7 @@ public class PayBookRestService {
 	@PostMapping(value = "/transaction/report")
 	@Operation(description = "Service to generate transaction report")
 	public ResponseEntity<ReportSearchVO> recordTransactionRecord(ReportSearchVO searchVO) {
-		try {
-			searchVO = new ReportSearchVO();
-			searchVO.setFromDate("01/JAN/2000");
-			searchVO.setToDate("01/JAN/2027");
-			searchVO.setAccountId(0);
-			searchVO.setDebtorId(3);
-			searchVO.setTransactionType("ALL");
-			searchVO.setFileType(".pdf");
-			searchVO.setReportName("DebtReport");
+		try {			
 			searchVO = transactionDataService.generateTransactionReport(searchVO);
 			return ResponseEntity.ok(searchVO);
 		} catch (AppBaseException ex) {
