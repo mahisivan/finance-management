@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,8 +24,8 @@ public class PayBookRestService {
 	private TransactionDataService transactionDataService;
 
 	@GetMapping("/message")
-	public ResponseEntity<String> welcomeMessage(@RequestBody String message) {
-		return ResponseEntity.ok("Welcome : " + message);
+	public ResponseEntity<String> welcomeMessage() {
+		return ResponseEntity.ok("<h1>API Documentation : /api/fna/api-docs</h1>");
 	}
 
 	@PostMapping(value = "/transaction/report")
