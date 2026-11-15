@@ -6,6 +6,6 @@
    "DebtorId": 3,
    "TransactionType": "ALL",
    "FileType": ".pdf",
-   "ReportName": "DebtReport",
+   "ReportName": "TransactionReport",
    "Action": "VIEW"   
 }</con:request><con:originalUri>http://localhost/paybook-rest/api/fna/message</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:request></con:method></con:resource></con:interface><con:properties/><con:wssContainer/><con:oAuth2ProfileContainer/><con:oAuth1ProfileContainer/></con:soapui-project>

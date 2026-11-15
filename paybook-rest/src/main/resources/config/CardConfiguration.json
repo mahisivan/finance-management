@@ -1,0 +1,28 @@
+{
+  "CardConfiguration": [
+    {
+      "CardId": 1,
+      "BankCode": "SBI",
+      "CardNumber": "5172529795685238",
+      "CardName": "Simply Save Card",
+      "ProviderName": "MAESTRO",
+      "ImageFilePath": "static/images/Bank_Logo/sbi_logo.jpg"
+    },
+    {
+      "CardId": 2,
+      "BankCode": "IDBI",
+      "CardNumber": "4850691200074101",
+      "CardName": "Royale Card",
+      "ProviderName": "VISA",
+      "ImageFilePath": "static/images/Bank_Logo/idbi_logo.jpg"
+    },
+    {
+      "CardId": 3,
+      "BankCode": "ICICI",
+      "CardNumber": "4343035501129898",
+      "CardName": "Multi Wallet Card",
+      "ProviderName": "VISA",
+      "ImageFilePath": "static/images/Bank_Logo/icici_logo.jpg"
+    }
+  ]
+}
