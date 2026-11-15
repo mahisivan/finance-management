@@ -13,20 +13,18 @@ import io.swagger.v3.oas.models.servers.Server;
 @Configuration
 public class ApiDocumentConfig {
 
-    @Value("${server.servlet.context-path}")
-    private String contextPath;
-	
-    @Bean
-    public OpenAPI openAPI() {
-        OpenAPI openAPIVO = new OpenAPI();
-        Info infoVO = new Info();
-        infoVO.title("PayBook Rest Services API");
-        infoVO.version("1.0");
-        infoVO.description("Spring Boot 4.0.0 API Documentation");
-        openAPIVO.setInfo(infoVO);
-        openAPIVO.servers(Collections.singletonList(
-                new Server().url(contextPath).description("PayBook Rest Services URL")
-        ));
-        return openAPIVO;
-    }
+	@Value("${server.servlet.context-path}")
+	private String contextPath;
+
+	@Bean
+	public OpenAPI openAPI() {
+		OpenAPI openAPIVO = new OpenAPI();
+		Info infoVO = new Info();
+		infoVO.title("PayBook Rest Services API");
+		infoVO.version("1.0");
+		infoVO.description("Spring Boot 4.0.0 API Documentation");
+		openAPIVO.setInfo(infoVO);
+		openAPIVO.servers(Collections.singletonList(new Server().url(contextPath).description("PayBook Rest Services URL")));
+		return openAPIVO;
+	}
 }
