@@ -5,5 +5,6 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap-icons/font/bootstrap-icons.css'
 import './styles.css'
 import './status.css'
+import './typography.css'
 import App from './App'
 ReactDOM.createRoot(document.getElementById('root')).render(<React.StrictMode><BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}><App /></BrowserRouter></React.StrictMode>)

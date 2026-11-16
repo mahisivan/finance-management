@@ -37,18 +37,18 @@ if errorlevel 1 (
 
 :backend_environment_ready
 
-"backend\.venv\Scripts\python.exe" -c "import pymysql, cryptography" >nul 2>&1
-if not errorlevel 1 goto mysql_driver_ready
+"backend\.venv\Scripts\python.exe" -c "import fastapi, uvicorn, sqlalchemy, pymysql, pydantic, pydantic_settings, dotenv, cryptography" >nul 2>&1
+if not errorlevel 1 goto backend_dependencies_ready
 
-echo Installing MySQL driver and authentication support...
-call "backend\.venv\Scripts\python.exe" -m pip install "PyMySQL[rsa]==1.1.1"
+echo Installing backend dependencies...
+call "backend\.venv\Scripts\python.exe" -m pip install -r "backend\requirements.txt"
 if errorlevel 1 (
-    echo MySQL driver installation failed.
+    echo Backend dependency installation failed.
     pause
     exit /b 1
 )
 
-:mysql_driver_ready
+:backend_dependencies_ready
 
 if not exist "frontend\node_modules\vite" (
     echo Installing frontend dependencies...

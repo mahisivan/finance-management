@@ -205,6 +205,50 @@ def debtor_balance(debtor_id:int,db:Session=Depends(get_db),user:models.User=Dep
         "balance":float(debit_total-credit_total),
     }
 
+@app.get("/api/debtors/balances")
+def debtor_balances(db:Session=Depends(get_db),user:models.User=Depends(get_current_user)):
+    credit_total=func.sum(case(
+        (models.Transaction.transaction_type == "C", models.Transaction.amount),
+        else_=0,
+    ))
+    debit_total=func.sum(case(
+        (models.Transaction.transaction_type == "D", models.Transaction.amount),
+        else_=0,
+    ))
+    balance=debit_total-credit_total
+    rows=db.execute(
+        select(
+            models.User.user_id,
+            models.User.first_name,
+            models.User.middle_name,
+            models.User.last_name,
+            models.User.email_id,
+            credit_total.label("credit_total"),
+            debit_total.label("debit_total"),
+            balance.label("balance"),
+        )
+        .join(models.Transaction, models.Transaction.debtor_id == models.User.user_id)
+        .where(models.User.user_id != user.user_id)
+        .group_by(
+            models.User.user_id,
+            models.User.first_name,
+            models.User.middle_name,
+            models.User.last_name,
+            models.User.email_id,
+        )
+        .having(balance != 0)
+        .order_by(func.abs(balance).desc(), models.User.first_name, models.User.last_name)
+    ).mappings().all()
+    return [
+        {
+            **row,
+            "credit_total":float(row["credit_total"] or 0),
+            "debit_total":float(row["debit_total"] or 0),
+            "balance":float(row["balance"]),
+        }
+        for row in rows
+    ]
+
 @app.get("/api/dashboard")
 def dashboard(transaction_type:str=Query(default="ALL"),db:Session=Depends(get_db),user:models.User=Depends(get_current_user)):
     transaction_type=transaction_type.upper()

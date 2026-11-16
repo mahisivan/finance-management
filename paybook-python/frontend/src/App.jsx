@@ -21,8 +21,6 @@ const icons = {
 };
 const money = (value) =>
   new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
     maximumFractionDigits: 2,
   }).format(Number(value || 0));
 const plainAmount = (value) => Number(value || 0).toFixed(2);
@@ -1228,99 +1226,69 @@ function labelForField(field, resource) {
 }
 
 function DebtorBalancePage() {
-  const [people, setPeople] = useState([]),
-    [debtorId, setDebtorId] = useState(""),
-    [balance, setBalance] = useState(null),
-    [loadingPeople, setLoadingPeople] = useState(true),
-    [loadingBalance, setLoadingBalance] = useState(false),
+  const [rows, setRows] = useState([]),
+    [loading, setLoading] = useState(true),
     [error, setError] = useState("");
   useEffect(() => {
     api
-      .get("/people")
-      .then((response) => setPeople(response.data))
-      .catch(() => setError("Unable to load debtors."))
-      .finally(() => setLoadingPeople(false));
+      .get("/debtors/balances")
+      .then((response) => setRows(response.data))
+      .catch((requestError) =>
+        setError(
+          requestError.response?.data?.detail || "Unable to load debtor balances.",
+        ),
+      )
+      .finally(() => setLoading(false));
   }, []);
-  const selectDebtor = async (event) => {
-    const id = event.target.value;
-    setDebtorId(id);
-    setBalance(null);
-    setError("");
-    if (!id) return;
-    setLoadingBalance(true);
-    try {
-      const response = await api.get(`/debtors/${id}/balance`);
-      setBalance(response.data);
-    } catch (requestError) {
-      setError(
-        requestError.response?.data?.detail || "Unable to load debtor balance.",
-      );
-    } finally {
-      setLoadingBalance(false);
-    }
-  };
-  const amount = Number(balance?.balance || 0),
-    color = loadingBalance
-      ? ""
-      : amount === 0
-        ? "balance-zero"
-        : amount > 0
-          ? "balance-positive"
-          : "balance-negative";
+  const columns = [
+    {
+      key: "debtor",
+      label: "Debtor",
+      value: (row) => {
+        const name = [row.first_name, row.middle_name, row.last_name]
+          .filter(Boolean)
+          .join(" ");
+        return row.email_id ? `${name} (${row.email_id})` : name;
+      },
+    },
+    {
+      key: "credit_total",
+      label: "Credit Total",
+      className: "text-end",
+      value: (row) => money(row.credit_total),
+    },
+    {
+      key: "debit_total",
+      label: "Debit Total",
+      className: "text-end",
+      value: (row) => money(row.debit_total),
+    },
+    {
+      key: "balance",
+      label: "Balance (Debit − Credit)",
+      className: (row) =>
+        `text-end ${row.balance > 0 ? "balance-positive" : "balance-negative"}`,
+      value: (row) => money(row.balance),
+    },
+  ];
   return (
     <>
       <div className="page-heading">
         <div>
           <div className="eyebrow">PEOPLE / BALANCES</div>
           <h1>Debtor Balance</h1>
-          <p>Review credit and debit totals for a selected debtor.</p>
+          <p>Review credit, debit, and outstanding balances for all debtors.</p>
         </div>
-      </div>
-      <div className="table-card p-3 mb-4">
-        <label className="form-label fw-semibold" htmlFor="debtor-balance-user">
-          Debtors
-        </label>
-        <select
-          id="debtor-balance-user"
-          className="form-select"
-          value={debtorId}
-          disabled={loadingPeople}
-          onChange={selectDebtor}
-        >
-          <option value="">
-            {loadingPeople ? "Loading debtors..." : "Select Debtor"}
-          </option>
-          {people.map((person) => (
-            <option key={person.user_id} value={person.user_id}>
-              {[person.first_name, person.middle_name, person.last_name]
-                .filter(Boolean)
-                .join(" ")}
-              {person.email_id ? ` (${person.email_id})` : ""}
-            </option>
-          ))}
-        </select>
       </div>
       {error && <div className="alert alert-warning">{error}</div>}
-      {debtorId && (
-        <div className="summary-grid">
-          <div className="summary-card">
-            <span>Credit Total</span>
-            <b>
-              {loadingBalance ? "Loading..." : money(balance?.credit_total)}
-            </b>
-          </div>
-          <div className="summary-card">
-            <span>Debit Total</span>
-            <b>{loadingBalance ? "Loading..." : money(balance?.debit_total)}</b>
-          </div>
-          <div className="summary-card">
-            <span>Balance (Debit − Credit)</span>
-            <b className={color}>
-              {loadingBalance ? "Loading..." : money(balance?.balance)}
-            </b>
-          </div>
-        </div>
-      )}
+      <PaginatedExportTable
+        columns={columns}
+        rows={rows}
+        loading={loading}
+        emptyMessage="No debtors with outstanding balances."
+        filename="debtor-balances"
+        title="Debtor Balances"
+      />
     </>
   );
 }

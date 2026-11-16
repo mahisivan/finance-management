@@ -1,0 +1,8 @@
+body,
+body *:not([class*="bi-"]) {
+  font-family: "Times New Roman", Times, serif !important;
+}
+
+body :not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(.stat-value):not(.brand-mark):not(.avatar):not([class*="bi-"]) {
+  font-size: 14px !important;
+}
