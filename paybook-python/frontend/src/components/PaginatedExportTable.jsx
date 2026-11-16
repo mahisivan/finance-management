@@ -1,0 +1,15 @@
+import React, { useState } from 'react'
+import { ExcelGenerator } from '../utils/ExcelGenerator'
+import { PdfGenerator } from '../utils/PdfGenerator'
+
+const PAGE_SIZE = 20
+
+export default function PaginatedExportTable({ columns, rows, loading, emptyMessage, filename, title }) {
+  const [page, setPage] = useState(1)
+  const pageCount = Math.max(1, Math.ceil(rows.length / PAGE_SIZE))
+  const currentPage = Math.min(page, pageCount)
+  const pageRows = rows.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
+  const isLastPage = currentPage === pageCount
+
+  return <div className="table-card"><div className="table-responsive"><table className="table align-middle mb-0"><thead><tr>{columns.map(column => <th key={column.key} className={column.className || ''}>{column.label}</th>)}</tr></thead><tbody>{loading ? <tr><td colSpan={columns.length} className="text-center py-4 text-muted">Loading...</td></tr> : pageRows.length ? pageRows.map((row, index) => <tr key={row.payment_id ?? row.transaction_id ?? row.salary_id ?? index}>{columns.map(column => { const value = column.value ? column.value(row) : row[column.key]; return <td key={column.key} className={column.className || ''}>{value == null || value === '' ? '—' : value}</td> })}</tr>) : <tr><td colSpan={columns.length} className="text-center py-4 text-muted">{emptyMessage}</td></tr>}</tbody></table></div><div className="d-flex justify-content-between align-items-center gap-2 flex-wrap px-3 py-2 border-top"><div className="d-flex align-items-center gap-2"><button className="btn btn-sm btn-outline-secondary" disabled={loading || currentPage <= 1} onClick={() => setPage(currentPage - 1)}>Previous</button>{pageCount > 1 && <button className="btn btn-sm btn-outline-secondary" disabled={loading || currentPage <= 1} onClick={() => setPage(1)}>First</button>}<small className="text-muted">Page {currentPage} of {pageCount} · {rows.length} records</small><button className="btn btn-sm btn-outline-secondary" disabled={loading || currentPage >= pageCount} onClick={() => setPage(currentPage + 1)}>Next</button>{pageCount > 1 && <button className="btn btn-sm btn-outline-secondary" disabled={loading || currentPage >= pageCount} onClick={() => setPage(pageCount)}>Last</button>}</div><div className="d-flex align-items-center gap-2 ms-auto">{isLastPage && rows.length > 0 && <><button className="btn btn-sm btn-outline-success" title="Export Excel" onClick={() => ExcelGenerator.download(columns, rows, filename)}><i className="bi bi-file-earmark-spreadsheet me-1" />Excel</button><button className="btn btn-sm btn-outline-danger" title="Export PDF" onClick={() => PdfGenerator.download(columns, rows, filename, title, filename.includes('transaction') ? (filename.includes('card') ? 'card_tx_banner.png' : 'debt_tx_banner.png') : filename.includes('loan') ? 'loan_tx_banner.png' : filename.includes('salary') ? 'salary_tx_banner.png' : null)}><i className="bi bi-file-earmark-pdf me-1" />PDF</button></>}</div></div></div>
+}

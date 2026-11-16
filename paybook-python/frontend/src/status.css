@@ -1,0 +1,63 @@
+.table > tbody > tr.status-active > * {
+  --bs-table-bg: #edf7ef;
+}
+
+.table > tbody > tr.status-expired > * {
+  --bs-table-bg: #fff1ed;
+}
+
+.record-status {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.record-status.status-active {
+  background: #d9efdf;
+  color: #245e38;
+}
+
+.record-status.status-expired {
+  background: #fce0d9;
+  color: #8b3529;
+}
+
+.balance-zero {
+  color: #237a3b !important;
+}
+
+.balance-positive {
+  color: #b42318 !important;
+}
+
+.balance-negative {
+  color: #2563a6 !important;
+}
+
+.sidebar .nav-item.subnav-item {
+  padding-left: 30px;
+  font-size: 12px;
+}
+
+.sidebar .nav-menu-toggle {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.sidebar .nav-menu-chevron {
+  margin-left: auto;
+  font-size: 12px !important;
+  transform: rotate(-90deg);
+  transition: transform 150ms ease;
+}
+
+.sidebar .nav-menu-chevron.expanded {
+  transform: rotate(0);
+}

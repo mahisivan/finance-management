@@ -1,0 +1,41 @@
+services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: finance
+      MYSQL_USER: fna_user
+      MYSQL_PASSWORD: fna_pswd
+      MYSQL_ROOT_PASSWORD: root_fna_pswd
+    ports:
+      - "3306:3306"
+    volumes:
+      - fna_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u$${MYSQL_USER} -p$${MYSQL_PASSWORD} --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: mysql+pymysql://fna_user:fna_pswd@db:3306/finance?charset=utf8mb4
+      CORS_ORIGINS: http://localhost:8080,http://127.0.0.1:8080
+      JWT_SECRET: replace_with_a_long_random_secret_before_deployment
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    environment:
+      VITE_API_URL: http://localhost:8000/api
+    ports:
+      - "8080:8080"
+    depends_on:
+      - backend
+
+volumes:
+  fna_mysql_data:
