@@ -117,6 +117,11 @@
 			<version>${fna-api.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>com.mahesh.product.fna.app</groupId>
+			<artifactId>debt-manager-service</artifactId>
+			<version>${fna-service.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
 			<version>${commons.collections4.version}</version>
