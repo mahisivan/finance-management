@@ -1,4 +1,4 @@
-package com.mahesh.fna.rest.service;
+package com.mahesh.fna.rest.webservices;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -23,16 +23,17 @@ import com.mahesh.cf.customexeception.AppBaseException;
 import com.mahesh.cf.customexeception.AppBaseExceptionLogger;
 import com.mahesh.fna.app.vo.ReportSearchVO;
 import com.mahesh.fna.app.vo.UserDataVO;
+import com.mahesh.fna.rest.service.JwtService;
 import com.mahesh.fna.rest.util.FnaRestHelper;
 import com.mahesh.fna.rest.util.PasswordEncoderUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-@RestController
-@RequestMapping("/api/fna/")
-@Tag(name = "PayBookRestService-API", description = "Transaction related operations")
-public class PayBookRestService {
+@RestController(value="authenticationRestService")
+@RequestMapping(value="/api/AuthenticationRestApi")
+@Tag(name="Authentication-API", description = "Authentication related operations")
+public class AuthenticationRestService {
 
 	@Value("${spring.datasource.url}")
 	private String databaseUrl;
@@ -54,27 +55,16 @@ public class PayBookRestService {
 
 	@PostMapping("/login")
 	public ResponseEntity<?> login(@RequestBody UserDataVO request) {
-
-		authenticationManager.authenticate(
-				new UsernamePasswordAuthenticationToken(request.getEmailId(), request.getLoginPassword()));
-
+		authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmailId(), request.getLoginPassword()));
 		String token = jwtService.generateToken(request.getEmailId());
-
-		ResponseCookie cookie = ResponseCookie.from("JWT_TOKEN", token).httpOnly(true).secure(true).path("/")
-				.maxAge(3600).sameSite("Strict").build();
-
-		return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString())
-				.body(Map.of("message", "Login successful", "emailId", request.getEmailId()));
+		ResponseCookie cookie = ResponseCookie.from("JWT_TOKEN", token).httpOnly(true).secure(true).path("/").maxAge(3600).sameSite("Strict").build();
+		return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString()).body(Map.of("message", "Login successful", "emailId", request.getEmailId()));
 	}
 
 	@PostMapping("/logout")
 	public ResponseEntity<?> logout() {
-
-		ResponseCookie cookie = ResponseCookie.from("JWT_TOKEN", "").httpOnly(true).secure(true).path("/").maxAge(0)
-				.sameSite("Strict").build();
-
-		return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString())
-				.body(Map.of("message", "Logout successful"));
+		ResponseCookie cookie = ResponseCookie.from("JWT_TOKEN", "").httpOnly(true).secure(true).path("/").maxAge(0).sameSite("Strict").build();
+		return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString()).body(Map.of("message", "Logout successful"));
 	}
 
 	@GetMapping("/encrypt/{password}")
