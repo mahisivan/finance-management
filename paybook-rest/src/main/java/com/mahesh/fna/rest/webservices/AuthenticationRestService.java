@@ -2,6 +2,7 @@ package com.mahesh.fna.rest.webservices;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,6 +13,8 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,10 +22,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.mahesh.cf.customexeception.AppBaseException;
 import com.mahesh.cf.customexeception.AppBaseExceptionLogger;
 import com.mahesh.fna.app.vo.ReportSearchVO;
-import com.mahesh.fna.app.vo.UserDataVO;
 import com.mahesh.fna.rest.service.JwtService;
 import com.mahesh.fna.rest.util.FnaRestHelper;
 import com.mahesh.fna.rest.util.PasswordEncoderUtil;
@@ -47,6 +50,9 @@ public class AuthenticationRestService {
 	@Value("${spring.datasource.driver-class-name}")
 	private String driverClassName;
 
+	@Value("${app.password.aes-key}")
+	private String passwordAesKey;
+
 	@Autowired
 	private AuthenticationManager authenticationManager;
 
@@ -54,29 +60,43 @@ public class AuthenticationRestService {
 	private JwtService jwtService;
 
 	@PostMapping("/login")
-	public ResponseEntity<?> login(@RequestBody UserDataVO request) {
-		authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmailId(), request.getLoginPassword()));
-		String token = jwtService.generateToken(request.getEmailId());
+	public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+		if (loginRequest.emailId() == null || loginRequest.emailId().isBlank()
+				|| loginRequest.loginPassword() == null || loginRequest.loginPassword().isBlank()) {
+			return ResponseEntity.badRequest().body(Map.of("message", "EmailId and LoginPassword are required"));
+		}
+		try {
+			Authentication auth = authenticationManager.authenticate(
+					new UsernamePasswordAuthenticationToken(loginRequest.emailId(), loginRequest.loginPassword()));
+			if (!auth.isAuthenticated()) {
+				return ResponseEntity.status(401).body(Map.of("message", "Invalid email or password"));
+			}
+		} catch (AuthenticationException ex) {
+			return ResponseEntity.status(401).body(Map.of("message", "Invalid email or password"));
+		}
+		String token = jwtService.generateToken(loginRequest.emailId());
 		ResponseCookie cookie = ResponseCookie.from("JWT_TOKEN", token).httpOnly(true).secure(true).path("/").maxAge(3600).sameSite("Strict").build();
-		return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString()).body(Map.of("message", "Login successful", "emailId", request.getEmailId()));
+		return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString())
+				.body(Map.of("message", "Login successful", "emailId", loginRequest.emailId()));
 	}
 
-	@PostMapping("/logout")
+	@GetMapping("/logout")
 	public ResponseEntity<?> logout() {
 		ResponseCookie cookie = ResponseCookie.from("JWT_TOKEN", "").httpOnly(true).secure(true).path("/").maxAge(0).sameSite("Strict").build();
 		return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString()).body(Map.of("message", "Logout successful"));
 	}
 
 	@GetMapping("/encrypt/{password}")
-	public ResponseEntity<String> encryptPassword(@PathVariable("password") String password) {
-		String encryptedPassword = PasswordEncoderUtil.encryptPassword(dbPassword);
-		StringBuilder sbf = new StringBuilder();
-		sbf.append("<html><body><h1>Orginal Password : ");
-		sbf.append(password);
-		sbf.append("</h1></br><h1>Encrypted Password : ");
-		sbf.append(encryptedPassword);
-		sbf.append("</h1></body></html>");
-		return ResponseEntity.ok(sbf.toString());
+	public ResponseEntity<?> encryptPassword(@PathVariable("password") String password) {
+		try {
+			String encryptedPassword = PasswordEncoderUtil.encrypt(password, passwordAesKey);
+			Map<String, String> hmap = new HashMap<>();
+			hmap.put("Encrypted Password", encryptedPassword);
+			return ResponseEntity.ok().body(hmap);
+		} catch (GeneralSecurityException | IllegalArgumentException ex) {
+			return ResponseEntity.internalServerError().body(Map.of("message", "Unable to encrypt the password"));
+		}
+
 	}
 
 	@PostMapping(value = "/transaction/report")
@@ -168,5 +188,9 @@ public class AuthenticationRestService {
 			AppBaseExceptionLogger.printErrorMessage(ex);
 		}
 		return ResponseEntity.ok(searchVO);
+	}
+
+	public record LoginRequest(@JsonAlias("EmailId") String emailId,
+			@JsonAlias("LoginPassword") String loginPassword) {
 	}
 }

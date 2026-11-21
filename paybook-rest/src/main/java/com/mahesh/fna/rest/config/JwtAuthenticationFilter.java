@@ -28,40 +28,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	
 	@Autowired
 	private UserDetailsService userDetailsService;
-
+		
 	@Override
-	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-			throws ServletException, IOException {
-
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 		String token = null;
-
 		if (request.getCookies() != null) {
 			token = Arrays.stream(request.getCookies()).filter(c -> "JWT_TOKEN".equals(c.getName()))
 					.map(Cookie::getValue).findFirst().orElse(null);
 		}
-
 		if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
 			try {
 				String username = jwtService.extractUsername(token);
-
 				UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
 				if (jwtService.isTokenValid(token) && userDetails.isEnabled() && userDetails.isAccountNonLocked()) {
-
-					var authentication = new UsernamePasswordAuthenticationToken(userDetails, null,
-							userDetails.getAuthorities());
-
+					var authentication = new UsernamePasswordAuthenticationToken(userDetails, null,	userDetails.getAuthorities());
 					authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
 					SecurityContextHolder.getContext().setAuthentication(authentication);
 				}
-
 			} catch (Exception e) {
 				SecurityContextHolder.clearContext();
 			}
 		}
-
 		filterChain.doFilter(request, response);
 	}
 }
